@@ -37,8 +37,10 @@ export interface ChartSeries {
   data: number[];
 }
 
+export type ChartType = 'bar' | 'line' | 'pie' | 'table' | 'process' | 'map';
+
 export interface ChartData {
-  chart_type: 'bar' | 'line' | 'pie' | 'table';
+  chart_type: ChartType;
   title: string;
   x_axis_label?: string;
   y_axis_label?: string;
