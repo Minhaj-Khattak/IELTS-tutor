@@ -6,7 +6,7 @@ import logging
 from typing import Optional, List, Dict, Any
 import httpx
 import nh3
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -797,8 +797,12 @@ Respond ONLY with a valid JSON object — no markdown fences:
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
 @app.get("/api/question", response_model=QuestionResponse)
-async def generate_task2_question() -> QuestionResponse:
+async def generate_task2_question(response: Response) -> QuestionResponse:
     """Generate an authentic Cambridge IELTS Task 2 question with high variety."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     if not _has_real_key():
         return random.choice(MOCK_TASK2_QUESTIONS)
 
@@ -838,16 +842,34 @@ async def generate_task2_question() -> QuestionResponse:
 
 
 @app.get("/api/question/task1", response_model=Task1QuestionResponse)
-async def generate_task1_question() -> Task1QuestionResponse:
+async def generate_task1_question(response: Response) -> Task1QuestionResponse:
     """Generate an authentic Cambridge IELTS Academic Task 1 question with visual chart data."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     if not _has_real_key():
         return random.choice(MOCK_TASK1_QUESTIONS)
 
     chart_types = ["bar", "line", "pie", "table", "process", "map"]
     chosen_chart = random.choice(chart_types)
+    t1_domains = [
+        "water consumption by agricultural, industrial, and domestic sectors across 4 nations",
+        "rail freight versus road haulage transport volumes in Australia and Canada",
+        "university graduate employment rates across STEM, Humanities, and Medicine in the UK",
+        "household waste generation and recycling percentages in Germany, Japan, and Sweden",
+        "international tourist visitor numbers and average stay duration in New Zealand",
+        "energy production by nuclear, hydro, solar, and natural gas in France and Spain",
+        "public library borrowing trends for physical versus digital publications in Canada",
+        "urban population growth and rural depopulation rates in South Korea and Japan",
+        "consumer expenditure on food, electronic gadgets, and apparel in the United States and UK",
+        "air passenger traffic across major international airports between 2005 and 2025"
+    ]
+    specific_domain = random.choice(t1_domains)
     seed = random.randint(1000, 99999)
     prompt = (
         f"Generate an authentic IELTS Academic Task 1 question based on a {chosen_chart} (Variant {seed}).\n"
+        f"Specific Domain Focus: {specific_domain}\n"
         f"CRITICAL: Do NOT use placeholder names like 'Country A', 'Country B', 'City X'. Use authentic real-world countries (e.g. United Kingdom, Canada, Japan, Germany, Australia, United States, France), real cities, or real industries.\n"
         f"Provide realistic numerical data points and standard Cambridge question prompt."
     )
