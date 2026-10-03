@@ -50,6 +50,7 @@ Both Render and Vercel deploy directly from your GitHub account.
    - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - **Instance Type**: Select **Free** ($0/month)
 5. Under **Environment Variables**, add:
+   - `PYTHON_VERSION`: `3.11.9` *(Crucial: prevents Render from defaulting to experimental Python 3.14)*
    - `GEMINI_API_KEY`: *(paste your actual Google Gemini API key)*
 6. Click **Deploy Web Service**.
 7. Once deployed, copy your backend URL at the top of the dashboard:
