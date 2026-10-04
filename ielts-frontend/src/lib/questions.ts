@@ -23,13 +23,19 @@ export const TYPE_LABELS: Record<QuestionType, string> = {
 }
 
 export async function fetchQuestion(): Promise<IELTSQuestion> {
-  const res = await fetch('/api/question')
+  const res = await fetch(`/api/question?t=${Date.now()}`, {
+    cache: 'no-store',
+    headers: { 'Cache-Control': 'no-cache' },
+  })
   if (!res.ok) throw new Error('Failed to generate question')
   return res.json()
 }
 
 export async function fetchTask1Question(): Promise<Task1Question> {
-  const res = await fetch('/api/question/task1')
+  const res = await fetch(`/api/question/task1?t=${Date.now()}`, {
+    cache: 'no-store',
+    headers: { 'Cache-Control': 'no-cache' },
+  })
   if (!res.ok) throw new Error('Failed to generate Task 1 question')
   return res.json()
 }
