@@ -18,17 +18,21 @@ import {
   BrainCircuit,
   CheckCircle2,
   Clock,
+  Eye,
+  EyeOff,
   FileText,
   Gauge,
   Headphones,
   LayoutDashboard,
   LogOut,
   Mic,
+  Moon,
   PenTool,
   PlayCircle,
   RotateCcw,
   ShieldCheck,
   Sparkles,
+  Sun,
 } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -446,11 +450,29 @@ function WritingStudio() {
 }
 
 export default function HomePage() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentModule, setCurrentModule] = useState<ModuleKey>('dashboard')
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [profileDraft, setProfileDraft] = useState<UserProfile>(defaultUser)
+  const [profileError, setProfileError] = useState('')
   const [authError, setAuthError] = useState('')
+  const [showProfilePanel, setShowProfilePanel] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
   const [form, setForm] = useState({ email: 'ava@ieltsstudio.ai', password: 'demo123' })
+  const [authPasswordVisible, setAuthPasswordVisible] = useState(false)
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('ielts-studio-theme') as 'dark' | 'light' | null
+    const nextTheme = savedTheme === 'light' ? 'light' : 'dark'
+    setTheme(nextTheme)
+    document.documentElement.setAttribute('data-theme', nextTheme)
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('ielts-studio-theme', theme)
+  }, [theme])
 
   useEffect(() => {
     try {
@@ -458,12 +480,20 @@ export default function HomePage() {
       if (saved) {
         const parsed = JSON.parse(saved) as UserProfile
         setProfile(parsed)
+        setProfileDraft(parsed)
         setIsAuthenticated(true)
       }
     } catch {
       localStorage.removeItem('ielts-studio-user')
     }
   }, [])
+
+  useEffect(() => {
+    if (!toastMessage) return
+
+    const timer = window.setTimeout(() => setToastMessage(''), 3000)
+    return () => window.clearTimeout(timer)
+  }, [toastMessage])
 
   const saveProfile = (nextProfile: UserProfile) => {
     setProfile(nextProfile)
@@ -496,10 +526,44 @@ export default function HomePage() {
     setAuthError('')
   }
 
+  const handleProfileSave = () => {
+    const name = profileDraft.name.trim()
+    const email = profileDraft.email.trim()
+    const goal = profileDraft.goal.trim()
+
+    if (!name || !email || !goal) {
+      setProfileError('Please complete your name, email, and study goal.')
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setProfileError('Enter a valid email address.')
+      return
+    }
+
+    const nextProfile: UserProfile = {
+      ...profileDraft,
+      name,
+      email,
+      goal,
+    }
+
+    saveProfile(nextProfile)
+    setProfileError('')
+    setShowProfilePanel(false)
+    setToastMessage('Profile saved successfully')
+  }
+
+  const toggleTheme = () => {
+    setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+  }
+
   const handleLogout = () => {
     setIsAuthenticated(false)
     setCurrentModule('dashboard')
     setProfile(null)
+    setProfileDraft(defaultUser)
+    setProfileError('')
     localStorage.removeItem('ielts-studio-user')
   }
 
@@ -574,13 +638,23 @@ export default function HomePage() {
 
                 <div>
                   <label className="mb-2 block text-sm text-slate-300">Password</label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white placeholder:text-slate-500"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      type={authPasswordVisible ? 'text' : 'password'}
+                      value={form.password}
+                      onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 pr-12 text-white placeholder:text-slate-500"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      aria-label={authPasswordVisible ? 'Hide password' : 'Show password'}
+                      onClick={() => setAuthPasswordVisible((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 hover:text-white"
+                    >
+                      {authPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 {authError && <p className="text-sm text-rose-300">{authError}</p>}
@@ -626,7 +700,7 @@ export default function HomePage() {
             <div className="flex h-full flex-col">
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 text-sm font-bold text-white glow-brand-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-600 text-sm font-bold text-white shadow-slate-900/40">
                     IE
                   </div>
                   <div>
@@ -634,6 +708,15 @@ export default function HomePage() {
                     <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Academy</div>
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  aria-label="Toggle theme"
+                  onClick={toggleTheme}
+                  className="rounded-xl border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10"
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
               </div>
 
               <nav className="space-y-2 p-4">
@@ -709,6 +792,17 @@ export default function HomePage() {
                 </div>
                 <button
                   type="button"
+                  onClick={() => {
+                    setProfileDraft(profile ?? defaultUser)
+                    setProfileError('')
+                    setShowProfilePanel(true)
+                  }}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-white/10"
+                >
+                  Profile
+                </button>
+                <button
+                  type="button"
                   onClick={() => setCurrentModule('writing')}
                   className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-purple-600 px-4 py-2.5 font-medium text-white shadow-lg shadow-brand-500/30 transition hover:brightness-110"
                 >
@@ -717,6 +811,93 @@ export default function HomePage() {
                 </button>
               </div>
             </header>
+
+            {toastMessage && (
+              <div className="pointer-events-none fixed right-5 top-5 z-[60] rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-100 shadow-lg shadow-emerald-900/20 backdrop-blur-sm">
+                {toastMessage}
+              </div>
+            )}
+
+            <div className={clsx('fixed inset-0 z-50 transition-opacity duration-200', showProfilePanel ? 'opacity-100' : 'pointer-events-none opacity-0')}>
+              <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setShowProfilePanel(false)} />
+
+              <aside
+                className={clsx(
+                  'absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-slate-950/95 p-6 shadow-2xl shadow-slate-950/60 transition-transform duration-200',
+                  showProfilePanel ? 'translate-x-0' : 'translate-x-full',
+                )}
+              >
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Profile</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-white">Settings</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowProfilePanel(false)}
+                    className="rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-sm text-slate-300"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                <div className="mt-6 space-y-5">
+                  <div>
+                    <label className="mb-2 block text-sm text-slate-300">Full name</label>
+                    <input
+                      value={profileDraft.name}
+                      onChange={(event) => setProfileDraft((prev) => ({ ...prev, name: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500"
+                      placeholder="Your name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm text-slate-300">Email</label>
+                    <input
+                      type="email"
+                      value={profileDraft.email}
+                      onChange={(event) => setProfileDraft((prev) => ({ ...prev, email: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm text-slate-300">Study goal</label>
+                    <input
+                      value={profileDraft.goal}
+                      onChange={(event) => setProfileDraft((prev) => ({ ...prev, goal: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500"
+                      placeholder="Target Band 7.5"
+                    />
+                  </div>
+
+                  {profileError && <p className="text-sm text-rose-300">{profileError}</p>}
+                </div>
+
+                <div className="mt-auto space-y-3 border-t border-white/10 pt-5">
+                  <button
+                    type="button"
+                    onClick={handleProfileSave}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-purple-600 px-4 py-3 font-medium text-white shadow-lg shadow-brand-500/30"
+                  >
+                    Save changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileDraft(profile ?? defaultUser)
+                      setProfileError('')
+                      setShowProfilePanel(false)
+                    }}
+                    className="flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-medium text-slate-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </aside>
+            </div>
 
             <div className="p-5 sm:p-6 lg:p-8">
               {currentModule === 'dashboard' && (
