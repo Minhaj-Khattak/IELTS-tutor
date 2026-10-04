@@ -6,10 +6,10 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
 
 export const metadata: Metadata = {
-  title: 'IELTS AI Examiner — Instant Essay Grading',
+  title: 'IELTS Studio | AI IELTS Learning Platform',
   description:
-    'Get your IELTS Task 2 essay graded instantly by an AI examiner. Receive band scores, sub-scores, and line-by-line corrections based on official IELTS criteria.',
-  keywords: ['IELTS', 'essay grading', 'AI examiner', 'band score', 'IELTS preparation'],
+    'IELTS Studio is a modern IELTS preparation platform with writing practice, speaking, reading, listening, and AI-guided learning.',
+  keywords: ['IELTS', 'IELTS Studio', 'IELTS preparation', 'AI tutor', 'band score'],
 }
 
 export default function RootLayout({
