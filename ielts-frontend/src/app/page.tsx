@@ -621,8 +621,8 @@ export default function HomePage() {
       <div className="orb orb-3" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="studio-shell rounded-[30px] overflow-hidden">
-          <aside className="border-b border-white/10 bg-slate-950/60 lg:border-b-0 lg:border-r lg:w-72">
+        <div className="studio-shell flex flex-col lg:flex-row rounded-[30px] overflow-hidden">
+          <aside className="border-b border-white/10 bg-slate-950/60 lg:border-b-0 lg:border-r lg:w-72 shrink-0">
             <div className="flex h-full flex-col">
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
                 <div className="flex items-center gap-3">
@@ -692,7 +692,7 @@ export default function HomePage() {
             </div>
           </aside>
 
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             <header className="flex flex-col gap-4 border-b border-white/10 bg-slate-950/40 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Learning platform</p>
